@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f7f3ea">
+<title>KJV Reader</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="KJV Reader">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loading"><div>Opening the Bible…</div></div>
+
+<!-- READER -->
+<div id="readView" class="view">
+  <header class="bar">
+    <button id="treeBtn" class="icon" aria-label="Contents">☰</button>
+    <button id="prevBtn" class="icon" aria-label="Previous chapter">‹</button>
+    <button id="titleBtn" class="title" aria-label="Choose book and chapter">Genesis 1</button>
+    <button id="nextBtn" class="icon" aria-label="Next chapter">›</button>
+    <button id="searchBtn" class="icon" aria-label="Search">🔍</button>
+    <button id="syncBtn" class="icon sync hidden" aria-label="Google Drive sync">☁</button>
+    <button id="settingsBtn" class="icon" aria-label="Display settings">Aa</button>
+  </header>
+  <div id="strip" class="strip hidden"><button id="backToResults">← Back to search results</button></div>
+  <main id="reader" class="reader"></main>
+  <div id="selBar" class="selbar hidden">
+    <div class="selrow"><span id="selCount"></span><button id="clearBtn" class="x" aria-label="Deselect">✕</button></div>
+    <div class="selrow tools">
+      <button class="sw hl-yellow" data-c="yellow" aria-label="Yellow highlight"></button>
+      <button class="sw hl-green" data-c="green" aria-label="Green highlight"></button>
+      <button class="sw hl-blue" data-c="blue" aria-label="Blue highlight"></button>
+      <button class="sw hl-pink" data-c="pink" aria-label="Pink highlight"></button>
+      <button class="sw hl-orange" data-c="orange" aria-label="Orange highlight"></button>
+      <button id="ulBtn" class="tb" aria-label="Underline"><u>U</u></button>
+      <button id="noteBtn" class="tb wide">✎ Note</button>
+      <button id="refsBtn" class="tb">⇄ Refs</button>
+      <button id="unmarkBtn" class="tb">Clear</button>
+      <button id="copyBtn" class="tb">Copy</button>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div id="searchView" class="view hidden">
+  <header class="bar">
+    <input id="q" type="search" placeholder='John 3:16, or words like "still small voice"' autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+    <button id="goBtn" class="pill">Go</button>
+    <button id="searchClose" class="pill">Close</button>
+  </header>
+  <div class="filters">
+    <button data-t="ALL" class="chip on">All</button>
+    <button data-t="OT" class="chip">Old Testament</button>
+    <button data-t="NT" class="chip">New Testament</button>
+    <label class="chk"><input id="wholeWord" type="checkbox" checked> Whole words</label>
+  </div>
+  <div id="results" class="results"></div>
+</div>
+
+<!-- MY NOTES -->
+<div id="notesView" class="view hidden">
+  <header class="bar">
+    <button id="notesBack" class="pill">← Back</button>
+    <strong class="ntitle">My notes, highlights &amp; links</strong>
+  </header>
+  <div class="filters">
+    <input id="nQ" type="search" class="nsearch" placeholder="Search my notes…" autocomplete="off" spellcheck="false">
+    <div id="nFilters" class="nfilters">
+      <button data-f="all" class="chip on">All</button>
+      <button data-f="notes" class="chip">Notes</button>
+      <button data-f="hl" class="chip">Highlights</button>
+      <button data-f="links" class="chip">Links</button>
+    </div>
+  </div>
+  <div id="nSummary" class="summary nsum"></div>
+  <div class="results">
+    <div id="nList"></div><div id="nMore"></div>
+  </div>
+  <div class="backup">
+    <div id="backupInfo" class="binfo"></div>
+    <div id="gNotesRow" class="gnotes hidden"><span>☁ Google Drive: <span id="gNotesStatus"></span></span><button id="gNotesNow" class="pill">Sync now</button></div>
+    <div class="brow">
+      <button id="exportBtn" class="pill">Export backup</button>
+      <button id="importBtn" class="pill">Import backup</button>
+      <input id="importFile" type="file" accept="application/json,.json" hidden>
+    </div>
+    <div class="bnote">Notes are saved in this browser on this device only. Export a backup now and then; import it on another device to bring your notes across.</div>
+  </div>
+</div>
+
+<!-- NOTE EDITOR -->
+<div id="noteSheet" class="sheet top hidden">
+  <div class="sheetbox">
+    <div class="sheethead"><strong id="noteRef"></strong><button id="noteClose" class="pill">Cancel</button></div>
+    <div class="notebody">
+      <div id="noteQuote" class="nquote"></div>
+      <textarea id="noteText" rows="7" placeholder="Write your note…"></textarea>
+      <div class="noteact"><button id="noteDel" class="pill danger">Delete note</button><button id="noteSave" class="pill primary">Save</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- VERSE PANEL: cross-references, my links, notes -->
+<aside id="panel" class="panel hidden" aria-label="Verse panel">
+  <div class="phead">
+    <button id="pBack" class="pill hidden">← Back</button>
+    <div id="pTitle" class="ptitle2"></div>
+    <button id="pMin" class="pill" aria-label="Shrink or expand">▾</button>
+    <button id="pClose" class="pill" aria-label="Close panel">✕</button>
+  </div>
+  <div id="pBody" class="pbody">
+    <div id="pVerse" class="pverse"></div>
+    <div id="pTabs" class="ptabs"></div>
+    <div id="pList"></div>
+    <div class="pcredit">Cross-references: OpenBible.info (CC-BY), ranked by community votes.</div>
+  </div>
+</aside>
+
+<!-- GOOGLE DRIVE SETUP -->
+<div id="gSheet" class="sheet gsheet hidden">
+  <div class="sheetbox small">
+    <div class="sheethead"><strong>Google Drive sync</strong><button id="gClose" class="pill">Close</button></div>
+    <div class="gbody">
+      <p>Keeps your notes, highlights and links in step on all your devices, using one small file in your own Google Drive. The app can only see the file it makes. Nobody else can.</p>
+      <div id="gIdRow">
+        <label for="gClientId">Client ID</label>
+        <input id="gClientId" type="text" placeholder="123456789-abc123.apps.googleusercontent.com" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <button id="gConnect" class="pill primary">Save and sign in with Google</button>
+      <div id="gMsg" class="gmsg"></div>
+      <button id="gAlt2" class="linkbtn hidden">Sign-in window not working? Sign in another way</button>
+      <details class="gdet"><summary>The two addresses Google asks for</summary>
+        <div class="gaddr"><div>Authorized JavaScript origin</div><code id="gOrigin"></code><button id="gCopyO" class="linkbtn">Copy</button></div>
+        <div class="gaddr"><div>Authorized redirect URI</div><code id="gRedirect"></code><button id="gCopyR" class="linkbtn">Copy</button></div>
+      </details>
+      <details class="gdet"><summary>How to get a Client ID (once, about 10 minutes)</summary>
+        <ol class="gsteps">
+          <li>Go to <b>console.cloud.google.com</b> and sign in with your Google account. Create a new project called KJV Reader.</li>
+          <li>Menu, <b>APIs &amp; Services</b>, <b>Library</b>. Search for <b>Google Drive API</b> and click <b>Enable</b>.</li>
+          <li>Menu, <b>APIs &amp; Services</b>, <b>OAuth consent screen</b> (it may be called Google Auth Platform). Set App name KJV Reader, your email, and Audience <b>External</b>.</li>
+          <li>Under <b>Data access</b> (Scopes), add <b>.../auth/drive.file</b> and save.</li>
+          <li>Under <b>Audience</b>, click <b>Publish app</b>. (If you leave it in Testing, add your own email as a test user.)</li>
+          <li><b>Credentials</b>, Create credentials, <b>OAuth client ID</b>, type <b>Web application</b>. Paste the two addresses above into Authorized JavaScript origins and Authorized redirect URIs. Create.</li>
+          <li>Copy the <b>Client ID</b> into the box above. (You do not need the secret.) Google can take a few minutes to start accepting a new setup.</li>
+        </ol>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENTS TREE -->
+<div id="treeScrim" class="scrim hidden"></div>
+<aside id="tree" class="tree" aria-label="Contents">
+  <div class="treehead">
+    <strong>Contents</strong>
+    <button id="treeClose" class="pill">Close</button>
+  </div>
+  <button id="notesBtn" class="notesrow">✎ My notes, highlights &amp; links <span id="notesCount"></span></button>
+  <div class="treefilter"><input id="treeFilter" type="search" placeholder="Filter books…" autocomplete="off" spellcheck="false"></div>
+  <div id="treeBody" class="treebody"></div>
+</aside>
+
+<!-- DISPLAY SETTINGS -->
+<div id="settings" class="sheet hidden">
+  <div class="sheetbox small">
+    <div class="sheethead"><strong>Display</strong><button id="settingsClose" class="pill">Done</button></div>
+    <div class="setrow"><span>Text size</span>
+      <input id="fontSize" type="range" min="14" max="32" step="1"></div>
+    <div class="setrow"><span>Theme</span>
+      <div class="seg" id="themeSeg">
+        <button data-th="auto">Auto</button><button data-th="light">Light</button><button data-th="sepia">Sepia</button><button data-th="dark">Dark</button>
+      </div></div>
+    <div class="setrow"><span>Supplied words in italics</span>
+      <div class="seg" id="italSeg"><button data-it="1">Show</button><button data-it="0">Hide</button></div></div>
+    <div class="setrow"><span>Layout</span>
+      <div class="seg" id="layoutSeg">
+        <button data-ly="flow">Paragraph</button><button data-ly="line">Verse per line</button>
+      </div></div>
+    <div class="about" id="syncSec">
+      <div class="abouttitle">Google Drive sync</div>
+      <div class="arow"><span>Status</span><span id="gStatus"></span></div>
+      <div class="arow gbtns"><button id="gSetup" class="pill">Set up</button><button id="gNow" class="pill hidden">Sync now</button><button id="gOff" class="pill hidden">Disconnect</button></div>
+      <div class="arow hidden" id="gAltRow"><button id="gAlt" class="pill">Sign in another way</button></div>
+    </div>
+    <div class="about">
+      <div class="abouttitle">About &amp; install</div>
+      <div class="arow"><span>Offline</span><span id="aOffline"></span></div>
+      <div class="arow"><span>Install</span><span id="aInstall"></span></div>
+      <div class="arow"><span>Notes storage</span><span id="aStorage"></span></div>
+      <div class="arow"><span>Version</span><span id="aVersion"></span></div>
+      <div class="arow"><button id="aCheck" class="pill">Check for updates</button><span id="aCheckMsg" class="amsg"></span></div>
+      <div class="acredit">Text: King James Version (1769 standard text), eBible.org, public domain.<br>Cross-references: OpenBible.info, CC-BY.</div>
+    </div>
+  </div>
+</div>
+
+<div id="updateBar" class="updatebar hidden"><span>A new version is ready.</span><button id="updateBtn">Update now</button><button id="updateLater">Later</button></div>
+<div id="toast" class="toast hidden"></div>
+
+<script src="data/sqljs.js"></script>
+<script src="data/sqljs-wasm-data.js"></script>
+<script src="data/bible-data.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
