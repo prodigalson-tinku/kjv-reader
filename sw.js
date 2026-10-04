@@ -1,5 +1,5 @@
-/* KJV Reader offline engine. The build step replaces 16a0e4cb with a fingerprint of the files. */
-const CACHE = 'kjv-reader-16a0e4cb';
+/* KJV Reader offline engine. The build step replaces 233a72ca with a fingerprint of the files. */
+const CACHE = 'kjv-reader-233a72ca';
 const FILES = [
   './', 'index.html', 'app.js', 'style.css', 'config.js', 'manifest.webmanifest',
   'data/sqljs.js', 'data/sqljs-wasm-data.js', 'data/bible-data.js',

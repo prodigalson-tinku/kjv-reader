@@ -1066,7 +1066,7 @@ function tokenCheck() {
   return { verses: rows.length, mismatched: bad };
 }
 /* ---------- install, offline & updates ---------- */
-const APP_VERSION = 'Stage 5 · build 16a0e4cb';
+const APP_VERSION = 'Stage 5 · build 233a72ca';
 const PWA = { reg: null, updating: false, installEvt: null };
 const isHttp = /^https?:$/.test(location.protocol);
 const isStandalone = () => (window.navigator.standalone === true) || window.matchMedia('(display-mode: standalone)').matches;
